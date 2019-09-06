@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>PayAnyWay Card Form</title>
+</head>
+<body>
+    <script type="text/javascript">
+        var paymentOptions = {
+            account: '32691195',
+            amount: '10',
+            lang: 'ru',
+            customParams: {
+                MNT_CUSTOM1: "custom 1",
+                customCustom: "custom true"
+            }
+        };
+
+        var assistant = new Assistant.Builder();
+
+        assistant.setHost("payanyway-dev-app1.service.local.moneta.ru");
+
+        assistant.setOnSuccessCallback(function(operationId, transactionId) {
+            alert("Success. OperationId: " + operationId + ", transactionId: " + transactionId);
+        });
+        assistant.setOnFailCallback(function(operationId, transactionId) {
+            alert("Fail. OperationId: " + operationId + ", transactionId: " + transactionId);
+        });
+        assistant.setOnInProgressCallback(function(operationId, transactionId) {
+            alert("In progress. OperationId: " + operationId + ", transactionId: " + transactionId);
+        });
+
+        assistant.build(paymentOptions);
+
+        // document.getElementById('pay').addEventListener('click', function() {
+        //     var assistant = new Assistant.Builder();
+        //
+        //     assistant.setOnSuccessCallback(function() {
+        //         setTimeout(() => {
+        //             assistant.closeModal();
+        //         }, 3000);
+        //     });
+        //
+        //     assistant.build(paymentOptions);
+        // });
+    </script>
+</body>
+</html>
