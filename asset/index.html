@@ -6,7 +6,20 @@
     <title>PayAnyWay Card Form</title>
 </head>
 <body>
+    <h1>Примеры</h1>
+
+    <h2>1. Форма встраивается в страницу</h2>
+
+    <div id="payment-container"></div>
+
+    <br/><br/>
+
+    <h2>2. Форма появляется в модальном окне</h2>
+
+    <button id="pay">Оплатить в модальном окне</button>
+
     <script type="text/javascript">
+        // укажите свой номер счёта, сумму и т.д.
         var paymentOptions = {
             account: '32691195',
             amount: '10',
@@ -19,10 +32,12 @@
 
         var assistant = new Assistant.Builder();
 
-        assistant.setHost("payanyway-dev-app1.service.local.moneta.ru");
-
         assistant.setOnSuccessCallback(function(operationId, transactionId) {
             alert("Success. OperationId: " + operationId + ", transactionId: " + transactionId);
+
+            setTimeout(function() {
+                assistant.closeModal();
+            }, 1500);
         });
         assistant.setOnFailCallback(function(operationId, transactionId) {
             alert("Fail. OperationId: " + operationId + ", transactionId: " + transactionId);
@@ -31,19 +46,11 @@
             alert("In progress. OperationId: " + operationId + ", transactionId: " + transactionId);
         });
 
-        assistant.build(paymentOptions);
+        assistant.build(paymentOptions, "payment-container");
 
-        // document.getElementById('pay').addEventListener('click', function() {
-        //     var assistant = new Assistant.Builder();
-        //
-        //     assistant.setOnSuccessCallback(function() {
-        //         setTimeout(() => {
-        //             assistant.closeModal();
-        //         }, 3000);
-        //     });
-        //
-        //     assistant.build(paymentOptions);
-        // });
+        document.getElementById('pay').addEventListener('click', function() {
+            assistant.build(paymentOptions);
+        });
     </script>
 </body>
 </html>

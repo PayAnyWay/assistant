@@ -334,8 +334,7 @@ class Builder {
         when(payload.type as? String) {
             "widgetHeight" -> {
                 (payload.containerId as? String)?.let {
-                    (document.getElementById(it) as? HTMLElement)?.style?.height =
-                        "${payload.height as? String ?: containerHeightPx}px"
+                    (document.getElementById(it) as? HTMLElement)?.style?.height = "${payload.height}px"
                 }
             }
             "close" -> closeModal()
