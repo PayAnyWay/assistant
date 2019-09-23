@@ -4,7 +4,9 @@ module.exports = {
     entry: 'kotlinApp', // kotlinApp is the default module name
 
     output: {
-        path: path.join(__dirname, 'dist')
+        filename: 'js/assistant-builder.js',
+        library: "Assistant",
+        libraryTarget: "var"
     },
 
     resolve: {
@@ -18,6 +20,9 @@ module.exports = {
             {
                 test: /\.js$/,
                 include: path.resolve(__dirname, 'kotlin_build'),
+                exclude: [
+                    /kotlin\.js$/, // Kotlin runtime doesn't have sourcemaps at the moment
+                ],
                 use: ['source-map-loader'],
                 enforce: 'pre'
             }

@@ -1,5 +1,6 @@
 import org.w3c.dom.*
 import org.w3c.dom.events.KeyboardEvent
+import org.w3c.dom.url.URLSearchParams
 import kotlin.browser.document
 import kotlin.browser.window
 
@@ -9,14 +10,14 @@ const val modalContentWidthLimitPx = 416
 
 const val containerHeightPx = 224
 
-val modalContentHeaderStyles = hashMapOf(
+val modalContentHeaderStyles = mapOf(
     "font-size" to "20px",
     "line-height" to "24px",
     "font-family" to "\"ProximaNova-Semibold\", Arial, sans-serif",
     "margin" to "22px 0 0 16px"
 )
 
-val modalCloseStyles = hashMapOf(
+val modalCloseStyles = mapOf(
     "width" to "48px",
     "height" to "48px",
     "position" to "absolute",
@@ -24,7 +25,7 @@ val modalCloseStyles = hashMapOf(
     "top" to "0"
 )
 
-val modalCloseIconStyles = hashMapOf(
+val modalCloseIconStyles = mapOf(
     "height" to "12px",
     "width" to "12px",
     "display" to "block",
@@ -33,7 +34,7 @@ val modalCloseIconStyles = hashMapOf(
     "cursor" to "pointer"
 )
 
-val modalOverlayStyles = hashMapOf(
+val modalOverlayStyles = mapOf(
     "background-color" to "rgba(0, 0, 0, 0.8)",
     "width" to "100vw",
     "height" to "100vh",
@@ -43,7 +44,7 @@ val modalOverlayStyles = hashMapOf(
     "z-index" to "100000"
 )
 
-val modalContentStyles = hashMapOf(
+val modalContentStyles = mapOf(
     "border-radius" to "4px",
     "min-width" to "320px",
     "max-width" to "${modalContentWidthLimitPx}px",
@@ -56,19 +57,19 @@ val modalContentStyles = hashMapOf(
     "width" to "100%"
 )
 
-val modalContentWideStyles = hashMapOf(
+val modalContentWideStyles = mapOf(
     "left" to "50%",
     "margin-left" to "-208px",
     "box-shadow" to "0 6px 12px 0 rgba(0, 26, 79, 0.08)"
 )
 
-val modalContentNarrowStyles = hashMapOf(
+val modalContentNarrowStyles = mapOf(
     "left" to "0",
     "margin-left" to "0",
     "box-shadow" to "none"
 )
 
-val containerStyles = hashMapOf(
+val containerStyles = mapOf(
     "border-radius" to "4px",
     "box-shadow" to "0 6px 12px 0 rgba(0, 26, 79, 0.08)",
     "min-width" to "320px",
@@ -77,27 +78,27 @@ val containerStyles = hashMapOf(
     "overflow" to "hidden"
 )
 
-val iframeStyles = hashMapOf(
+val iframeStyles = mapOf(
     "border" to "none",
     "min-height" to "${containerHeightPx}px",
     "width" to "100%",
     "height" to "100%"
 )
 
-val modalContainerStyles = hashMapOf(
+val modalContainerStyles = mapOf(
     "min-width" to "320px",
     "max-width" to "${modalContentWidthLimitPx}px",
     "height" to "${containerHeightPx}px"
 )
 
-val modalIframeStyles = hashMapOf(
+val modalIframeStyles = mapOf(
     "border" to "none",
     "min-height" to "${containerHeightPx}px",
     "width" to "100%",
     "height" to "100%"
 )
 
-val defaultOptions = hashMapOf(
+val defaultOptions = mapOf(
     "account" to "",
     "amount" to "",
     "transactionId" to "",
@@ -108,7 +109,7 @@ val defaultOptions = hashMapOf(
     "paymentSystemId" to "card"
 )
 
-val assistantParams = hashMapOf(
+val assistantParams = mapOf(
     "account" to "MNT_ID",
     "amount" to "MNT_AMOUNT",
     "transactionId" to "MNT_TRANSACTION_ID",
@@ -134,21 +135,13 @@ fun resolveHeaderText(lang: AssistantLang) = when(lang) {
     AssistantLang.EN -> "Card payment"
 }
 
-fun createAndStylizeElement(tag: String, styles: Map<String, String>): HTMLElement {
-    val el = document.createElement(tag) as HTMLElement
-    el.applyStyles(styles)
-
-    return el
-}
+fun createAndStylizeElement(tag: String, styles: Map<String, String>): HTMLElement =
+    (document.createElement(tag) as HTMLElement).apply { applyStyles(styles) }
 
 fun HTMLElement.applyStyles(styles: Map<String, String>) = styles.forEach { style.setProperty(it.key, it.value) }
 
-fun createModalContentHeader(lang: AssistantLang): HTMLElement {
-    val header = createAndStylizeElement("div", modalContentHeaderStyles)
-    header.textContent = resolveHeaderText(lang)
-
-    return header
-}
+fun createModalContentHeader(lang: AssistantLang): HTMLElement =
+    createAndStylizeElement("div", modalContentHeaderStyles).apply { textContent = resolveHeaderText(lang) }
 
 fun createModalCloseIconContainer(): HTMLElement = createAndStylizeElement("div", modalCloseStyles)
 
@@ -164,13 +157,11 @@ fun createModalContent(): HTMLElement {
         else content.applyStyles(modalContentWideStyles)
     }
 
-    val mql = window.matchMedia("(max-width: ${modalContentWidthLimitPx}px)")
+    val mql = window.matchMedia("(max-width: ${modalContentWidthLimitPx}px)").apply {
+        addListener { applyStyles((it as MediaQueryListEvent).matches) }
+    }
 
     applyStyles(mql.matches);
-
-    mql.addListener {
-        applyStyles((it as MediaQueryListEvent).matches)
-    }
 
     return content
 }
@@ -178,8 +169,7 @@ fun createModalContent(): HTMLElement {
 fun parseOptions(options: dynamic): HashMap<String, String> {
     val optionsMap = hashMapOf<String, String>()
 
-    val keys = js("Object.keys(options)") as Array<String>
-    keys.forEach {
+    (js("Object.keys(options)") as Array<String>).forEach {
         val value = options[it]
 
         if (js("typeof value === 'object'") as Boolean)
@@ -191,37 +181,29 @@ fun parseOptions(options: dynamic): HashMap<String, String> {
     return optionsMap
 }
 
-fun mergeOptions(defaultOptions: HashMap<String, String>,
-                 clientOptions: HashMap<String, String>): HashMap<String, String> {
-    val options = hashMapOf<String, String>()
-
-    options.putAll(defaultOptions)
-    options.putAll(clientOptions)
-
-    return options
-}
-
-fun buildAssistantUrl(host: String, options: HashMap<String, String>): String {
-    var query = ""
-
-    options.forEach {
-        query += "${if (query.isNotEmpty()) "&" else ""}${assistantParams[it.key] ?: it.key}=${js("encodeURIComponent(it.value)")}"
+fun mergeOptions(defaultOptions: Map<String, String>, clientOptions: HashMap<String, String>) =
+    hashMapOf<String, String>().apply {
+        putAll(defaultOptions)
+        putAll(clientOptions)
     }
 
-    return "https://${host}/assistant.htm?${query}"
-}
+fun buildAssistantUrl(host: String, options: HashMap<String, String>) =
+    with(StringBuilder("https://${host}/assistant.htm?")) {
+        append(URLSearchParams().apply {
+            options.forEach { append(assistantParams[it.key] ?: it.key, it.value) }
+        })
+        toString()
+    }
 
 fun setViewport() {
-    var meta = document.querySelector("meta[name=viewport]") as HTMLMetaElement?
+    (document.querySelector("meta[name=viewport]") as? HTMLMetaElement
+        ?: (document.createElement("meta") as HTMLMetaElement).apply {
+            name = "viewport"
+            document.getElementsByTagName("head")[0]?.appendChild(this)
+        }).apply {
 
-    if (meta == null) {
-        meta = document.createElement("meta") as HTMLMetaElement
-        meta.name = "viewport"
-
-        document.getElementsByTagName("head")[0]?.appendChild(meta)
+        content = "width=device-width, initial-scale=1, user-scalable=no"
     }
-
-    meta.content = "width=device-width, initial-scale=1, user-scalable=no"
 }
 
 fun generateId() = "paw-payment-form-${(1..10000).random()}${('A'..'Z').random()}${('a'..'z').random()}"
@@ -244,40 +226,37 @@ class Builder {
             messageListenerAttached = true
         }
 
-        val assistantOptions = mergeOptions(defaultOptions, parseOptions(options))
+        val modal = containerId.isBlank()
 
-        val iframe = document.createElement("iframe") as HTMLIFrameElement
-        val container: HTMLElement?
-
-        if (containerId.isNotBlank()) {
-            container = document.getElementById(containerId) as? HTMLElement ?: return
-
-            while(container.hasChildNodes()) {
-                container.firstChild?.let { container.removeChild(it) }
+        if (modal) {
+            createAndStylizeElement("div", modalContainerStyles).apply {
+                id = generateId()
             }
-
-            assistantOptions["containerId"] = containerId
-
-            container.applyStyles(containerStyles)
-            iframe.applyStyles(iframeStyles)
         } else {
-            container = createAndStylizeElement("div", modalContainerStyles)
+            (document.getElementById(containerId) as? HTMLElement)?.apply {
+                while (hasChildNodes()) {
+                    firstChild?.let { removeChild(it) }
+                }
 
-            val id = generateId()
-
-            container.id = id
+                applyStyles(containerStyles)
+            } ?: throw IllegalArgumentException("Wrong containerId")
+        }.apply {
+            val assistantOptions = mergeOptions(defaultOptions, parseOptions(options))
             assistantOptions["containerId"] = id
 
-            iframe.applyStyles(modalIframeStyles)
+            if (modal) {
+                assistantOptions["theme"] = AssistantTheme.LIGHT.name.toLowerCase()
 
-            assistantOptions["theme"] = AssistantTheme.LIGHT.name.toLowerCase()
+                createModal(this,
+                    AssistantLang.valueOf(assistantOptions["lang"]?.toUpperCase() ?: AssistantLang.RU.name))
+            }
 
-            createModal(container,
-                AssistantLang.valueOf(assistantOptions["lang"]?.toUpperCase() ?: AssistantLang.RU.name))
+            appendChild((document.createElement("iframe") as HTMLIFrameElement).apply {
+                src = buildAssistantUrl(host ?: defaultHost, assistantOptions)
+
+                applyStyles(if (modal) modalIframeStyles else iframeStyles)
+            })
         }
-
-        iframe.src = buildAssistantUrl(host ?: defaultHost, assistantOptions)
-        container.appendChild(iframe)
     }
 
     @JsName("closeModal")
@@ -309,23 +288,23 @@ class Builder {
     private fun createModal(iframeContainer: HTMLElement, lang: AssistantLang) {
         if (modal != null) closeModal()
 
-        modal = createModalOverlay()
+        modal = createModalOverlay().apply {
+            appendChild(
+                createModalContent().apply {
+                    appendChild(createModalCloseIconContainer().apply {
+                        appendChild(createModalCloseIcon().apply {
+                            addEventListener("click", { closeModal() })
+                        })
+                    })
+                    appendChild(createModalContentHeader(lang))
+                    appendChild(iframeContainer)
+                })
+        }
 
-        val closeIcon = createModalCloseIcon()
-        closeIcon.addEventListener("click", { closeModal() })
-
-        val closeIconContainer = createModalCloseIconContainer()
-        closeIconContainer.appendChild(closeIcon)
-
-        val content = createModalContent()
-        content.appendChild(closeIconContainer)
-        content.appendChild(createModalContentHeader(lang))
-        content.appendChild(iframeContainer)
-
-        modal!!.appendChild(content)
-
-        document.body?.appendChild(modal!!)
-        document.addEventListener("keyup", { if ((it as KeyboardEvent).code == "Escape") closeModal() })
+        document.apply {
+            body?.appendChild(modal!!)
+            addEventListener("keyup", { if ((it as KeyboardEvent).code == "Escape") closeModal() })
+        }
     }
 
     private fun messageListener(event: MessageEvent) {
@@ -333,8 +312,8 @@ class Builder {
 
         when(payload.type as? String) {
             "widgetHeight" -> {
-                (payload.containerId as? String)?.let {
-                    (document.getElementById(it) as? HTMLElement)?.style?.height = "${payload.height}px"
+                (payload.containerId as? String)?.run {
+                    (document.getElementById(this) as? HTMLElement)?.style?.height = "${payload.height}px"
                 }
             }
             "close" -> closeModal()

@@ -10,20 +10,8 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = merge(kotlinConfig, {
     mode: 'production',
 
-    output: {
-        filename: 'js/assistant-builder.js',
-        library: "Assistant",
-        libraryTarget: "var"
-    },
-
     plugins: [
-        new CleanWebpackPlugin({
-            // be very careful with this plugin, test new paths with:
-            // dry: true,
-            cleanOnceBeforeBuildPatterns: [
-                'dist', 'kotlin_build'
-            ]
-        }),
+        new CleanWebpackPlugin(),
         new KotlinWebpackPlugin({
             src: path.join(__dirname, 'src/main'),
             optimize: true,
