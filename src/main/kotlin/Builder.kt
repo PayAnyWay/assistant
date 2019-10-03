@@ -1,8 +1,9 @@
 import org.w3c.dom.*
 import org.w3c.dom.events.KeyboardEvent
-import org.w3c.dom.url.URLSearchParams
 import kotlin.browser.document
 import kotlin.browser.window
+
+external fun encodeURIComponent(encodedURI: String): String
 
 const val defaultHost = "payanyway.ru"
 
@@ -189,9 +190,9 @@ fun mergeOptions(defaultOptions: Map<String, String>, clientOptions: HashMap<Str
 
 fun buildAssistantUrl(host: String, options: HashMap<String, String>) =
     with(StringBuilder("https://${host}/assistant.htm?")) {
-        append(URLSearchParams().apply {
-            options.forEach { append(assistantParams[it.key] ?: it.key, it.value) }
-        })
+        append(
+            options.map { "${assistantParams[it.key] ?: it.key}=${encodeURIComponent(it.value)}" }
+                .joinToString("&"))
         toString()
     }
 
