@@ -3,7 +3,7 @@ import org.w3c.dom.events.KeyboardEvent
 import kotlin.browser.document
 import kotlin.browser.window
 
-external fun encodeURIComponent(encodedURI: String): String
+external fun encodeURIComponent(uri: String): String
 
 const val defaultHost = "payanyway.ru"
 
@@ -100,9 +100,6 @@ val modalIframeStyles = mapOf(
 )
 
 val defaultOptions = mapOf(
-    "account" to "",
-    "amount" to "",
-    "transactionId" to "",
     "testMode" to "0",
     "version" to "2",
     "theme" to AssistantTheme.LIGHT.name.toLowerCase(),
