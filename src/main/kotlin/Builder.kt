@@ -159,7 +159,7 @@ fun createModalContent(): HTMLElement {
         addListener { applyStyles((it as MediaQueryListEvent).matches) }
     }
 
-    applyStyles(mql.matches);
+    applyStyles(mql.matches)
 
     return content
 }
@@ -170,9 +170,9 @@ fun parseOptions(options: dynamic): HashMap<String, String> {
     (js("Object.keys(options)") as Array<String>).forEach {
         val value = options[it]
 
-        if (js("typeof value === 'object'") as Boolean)
+        if (js("value !== null && typeof value === 'object'") as Boolean)
             optionsMap.putAll(parseOptions(value))
-        else
+        else if (js("value !== undefined && value !== null") as Boolean)
             optionsMap[it] = value.toString()
     }
 
@@ -217,6 +217,10 @@ class Builder {
 
     @JsName("build")
     fun build(options: dynamic, containerId: String = "") {
+        if (js("options === null || typeof options !== 'object'") as Boolean) {
+            throw IllegalArgumentException("options must be an object")
+        }
+
         setViewport()
 
         if (!messageListenerAttached) {
