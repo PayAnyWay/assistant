@@ -23,6 +23,7 @@
     "webpack": "4.39.3",
     "webpack-cli": "3.3.7",
     "webpack-dev-server": "3.8.0",
-    "webpack-merge": "4.2.2"
+    "webpack-merge": "4.2.2",
+    "string-replace-loader": "2.3.0"
   }
 }

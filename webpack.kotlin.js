@@ -1,4 +1,5 @@
 const path = require('path');
+const config = require('./config.json');
 
 module.exports = {
     entry: 'kotlinApp', // kotlinApp is the default module name
@@ -25,6 +26,24 @@ module.exports = {
                 ],
                 use: ['source-map-loader'],
                 enforce: 'pre'
+            },
+            {
+                test: /\.js$/,
+                loader: "string-replace-loader",
+                options: {
+                    multiple: [
+                        {
+                            search: "{{PRODUCTION_HOST}}",
+                            replace: config.PRODUCTION_HOST,
+                            flags: "ig"
+                        },
+                        {
+                            search: "{{DEMO_HOST}}",
+                            replace: config.DEMO_HOST,
+                            flags: "ig"
+                        }
+                    ]
+                }
             }
         ]
     }

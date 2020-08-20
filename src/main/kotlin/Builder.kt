@@ -5,7 +5,8 @@ import kotlin.browser.window
 
 external fun encodeURIComponent(uri: String): String
 
-const val defaultHost = "payanyway.ru"
+const val productionHost = "{{PRODUCTION_HOST}}"
+const val demoHost = "{{DEMO_HOST}}"
 
 const val modalContentWidthLimitPx = 416
 
@@ -128,7 +129,7 @@ enum class AssistantTheme {
     LIGHT, DARK;
 }
 
-fun resolveHeaderText(lang: AssistantLang) = when(lang) {
+fun resolveHeaderText(lang: AssistantLang) = when (lang) {
     AssistantLang.RU -> "Оплата банковской картой"
     AssistantLang.EN -> "Card payment"
 }
@@ -185,13 +186,15 @@ fun mergeOptions(defaultOptions: Map<String, String>, clientOptions: HashMap<Str
         putAll(clientOptions)
     }
 
-fun buildAssistantUrl(host: String, options: HashMap<String, String>) =
-    with(StringBuilder("https://${host}/assistant.htm?")) {
-        append(
-            options.map { "${assistantParams[it.key] ?: it.key}=${encodeURIComponent(it.value)}" }
-                .joinToString("&"))
-        toString()
+fun buildAssistantUrl(isDemo: Boolean, options: HashMap<String, String>): String {
+    val paramString =
+        options.map { "${assistantParams[it.key] ?: it.key}=${encodeURIComponent(it.value)}" }.joinToString("&")
+    var host = productionHost
+    if (isDemo) {
+        host = demoHost
     }
+    return "${host}/assistant.htm?$paramString"
+}
 
 fun setViewport() {
     (document.querySelector("meta[name=viewport]") as? HTMLMetaElement
@@ -249,17 +252,23 @@ class Builder {
             if (modal) {
                 assistantOptions["theme"] = AssistantTheme.LIGHT.name.toLowerCase()
 
-                createModal(this,
-                    AssistantLang.valueOf(assistantOptions["lang"]?.toUpperCase() ?: AssistantLang.RU.name))
+                createModal(
+                    this,
+                    AssistantLang.valueOf(assistantOptions["lang"]?.toUpperCase() ?: AssistantLang.RU.name)
+                )
             }
 
             appendChild((document.createElement("iframe") as HTMLIFrameElement).apply {
-                src = buildAssistantUrl(host ?: defaultHost, assistantOptions)
-
+                src = buildAssistantUrl(resolveIsDemo(options), assistantOptions)
                 applyStyles(if (modal) modalIframeStyles else iframeStyles)
             })
         }
     }
+
+    private fun resolveIsDemo(options: Any?): Boolean =
+        with(options?.asDynamic().demo?.toString()?.toLowerCase()) {
+            this == "1" || this == "true"
+        }
 
     @JsName("closeModal")
     fun closeModal() {
@@ -312,16 +321,22 @@ class Builder {
     private fun messageListener(event: MessageEvent) {
         val payload = event.data?.asDynamic() ?: return
 
-        when(payload.type as? String) {
+        when (payload.type as? String) {
             "widgetHeight" -> {
                 (payload.containerId as? String)?.run {
                     (document.getElementById(this) as? HTMLElement)?.style?.height = "${payload.height}px"
                 }
             }
             "close" -> closeModal()
-            "success" -> if (onSuccessCallback != null) { onSuccessCallback(payload.operationId, payload.transactionId) }
-            "fail" -> if (onFailCallback != null) { onFailCallback(payload.operationId, payload.transactionId) }
-            "inProgress" -> if (onInProgressCallback != null) { onInProgressCallback(payload.operationId, payload.transactionId) }
+            "success" -> if (onSuccessCallback != null) {
+                onSuccessCallback(payload.operationId, payload.transactionId)
+            }
+            "fail" -> if (onFailCallback != null) {
+                onFailCallback(payload.operationId, payload.transactionId)
+            }
+            "inProgress" -> if (onInProgressCallback != null) {
+                onInProgressCallback(payload.operationId, payload.transactionId)
+            }
         }
     }
 }
