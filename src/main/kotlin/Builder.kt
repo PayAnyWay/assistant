@@ -5,9 +5,6 @@ import kotlin.browser.window
 
 external fun encodeURIComponent(uri: String): String
 
-const val productionHost = "{{PRODUCTION_HOST}}"
-const val demoHost = "{{DEMO_HOST}}"
-
 const val modalContentWidthLimitPx = 416
 
 const val containerHeightPx = 224
@@ -186,14 +183,10 @@ fun mergeOptions(defaultOptions: Map<String, String>, clientOptions: HashMap<Str
         putAll(clientOptions)
     }
 
-fun buildAssistantUrl(isDemo: Boolean, options: HashMap<String, String>): String {
+fun buildAssistantUrl(options: HashMap<String, String>): String {
     val paramString =
         options.map { "${assistantParams[it.key] ?: it.key}=${encodeURIComponent(it.value)}" }.joinToString("&")
-    var host = productionHost
-    if (isDemo) {
-        host = demoHost
-    }
-    return "${host}/assistant.htm?$paramString"
+    return "{{HOST}}/assistant.htm?$paramString"
 }
 
 fun setViewport() {
@@ -252,23 +245,17 @@ class Builder {
             if (modal) {
                 assistantOptions["theme"] = AssistantTheme.LIGHT.name.toLowerCase()
 
-                createModal(
-                    this,
-                    AssistantLang.valueOf(assistantOptions["lang"]?.toUpperCase() ?: AssistantLang.RU.name)
-                )
+                createModal(this,
+                    AssistantLang.valueOf(assistantOptions["lang"]?.toUpperCase() ?: AssistantLang.RU.name))
             }
 
             appendChild((document.createElement("iframe") as HTMLIFrameElement).apply {
-                src = buildAssistantUrl(resolveIsDemo(options), assistantOptions)
+                src = buildAssistantUrl(assistantOptions)
+
                 applyStyles(if (modal) modalIframeStyles else iframeStyles)
             })
         }
     }
-
-    private fun resolveIsDemo(options: Any?): Boolean =
-        with(options?.asDynamic().demo?.toString()?.toLowerCase()) {
-            this == "1" || this == "true"
-        }
 
     @JsName("closeModal")
     fun closeModal() {
@@ -328,15 +315,9 @@ class Builder {
                 }
             }
             "close" -> closeModal()
-            "success" -> if (onSuccessCallback != null) {
-                onSuccessCallback(payload.operationId, payload.transactionId)
-            }
-            "fail" -> if (onFailCallback != null) {
-                onFailCallback(payload.operationId, payload.transactionId)
-            }
-            "inProgress" -> if (onInProgressCallback != null) {
-                onInProgressCallback(payload.operationId, payload.transactionId)
-            }
+            "success" -> if (onSuccessCallback != null) { onSuccessCallback(payload.operationId, payload.transactionId) }
+            "fail" -> if (onFailCallback != null) { onFailCallback(payload.operationId, payload.transactionId) }
+            "inProgress" -> if (onInProgressCallback != null) { onInProgressCallback(payload.operationId, payload.transactionId) }
         }
     }
 }

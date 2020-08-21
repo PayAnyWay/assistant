@@ -1,28 +1,31 @@
 const path = require('path');
+const webpack = require('webpack');
 
-const merge = require('webpack-merge');
+const webpackMerge = require('webpack-merge');
 const kotlinConfig = require('./webpack.kotlin.js');
 
 const KotlinWebpackPlugin = require('@jetbrains/kotlin-webpack-plugin');
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+// const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
-module.exports = merge(kotlinConfig, {
-    mode: 'production',
+module.exports = function (env) {
+    return webpackMerge.merge(kotlinConfig(env), {
+        mode: 'production',
 
-    plugins: [
-        new CleanWebpackPlugin(),
-        new KotlinWebpackPlugin({
-            src: path.join(__dirname, 'src/main'),
-            optimize: true,
-            verbose: true,
-            librariesAutoLookup: true
-        })
-    ],
+        plugins: [
+            // new CleanWebpackPlugin(),
+            new KotlinWebpackPlugin({
+                src: path.join(__dirname, 'src/main'),
+                optimize: true,
+                verbose: true,
+                librariesAutoLookup: true
+            })
+        ],
 
-    optimization: {
-        minimizer: [new TerserPlugin({
-            parallel: true
-        })]
-    }
-});
+        optimization: {
+            minimizer: [new TerserPlugin({
+                parallel: true
+            })]
+        }
+    });
+};
