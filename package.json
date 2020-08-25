@@ -5,9 +5,11 @@
   "scripts": {
     "build:prod": "webpack --env.production --progress --profile --bail --display-reasons --display-error-details --config webpack.production.js --output-filename='js/assistant-builder.js'",
     "build:demo": "webpack --env.demo --progress --profile --bail --display-reasons --display-error-details --config webpack.production.js --output-filename='js/assistant-builder.demo.js'",
-    "buid": "npm run build:demo && npm run build:prod",
+    "build:dev": "webpack --env.development --progress --profile --bail --display-reasons --display-error-details --config webpack.production.js --output-filename='js/assistant-builder.dev.js'",
+    "buid": "npm run build:dev && npm run build:demo && npm run build:prod",
     "dev": "webpack-dev-server --progress --watch-poll --config webpack.development.js",
     "dev:demo": "webpack-dev-server --env.demo --progress --watch-poll --config webpack.development.js",
+    "dev:dev": "webpack-dev-server --env.development --progress --watch-poll --config webpack.development.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

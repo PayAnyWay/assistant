@@ -1,4 +1,5 @@
 {
   "PRODUCTION_HOST": "https://payanyway.ru",
-  "DEMO_HOST": "https://demo.moneta.ru"
+  "DEMO_HOST": "https://demo.moneta.ru",
+  "DEVELOPMENT_HOST": "https://payanyway-dev-app1.service.local.moneta.ru"
 }

@@ -4,6 +4,7 @@ const config = require('./config');
 function resolveHostByEnv(env) {
     if (env) {
         if (env.demo) return config.DEMO_HOST
+        if (env.development) return config.DEVELOPMENT_HOST
     }
 
     return config.PRODUCTION_HOST
